@@ -2310,3 +2310,46 @@ html.has-motion body { overflow: hidden; }
   .opening-brand em { letter-spacing: .34em; }
   .opening-progress { width: 58vw; }
 }
+/* ===== Responsive project fact cards ===== */
+.case-facts {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px !important;
+  margin: clamp(24px, 3vw, 46px) clamp(16px, 3vw, 46px) clamp(38px, 5vw, 72px) !important;
+  border: 0 !important;
+}
+.case-fact {
+  min-width: 0;
+  min-height: 118px !important;
+  padding: 22px !important;
+  border: 1px solid rgba(255,255,255,.68) !important;
+  border-radius: 12px !important;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+.case-fact span {
+  display: block;
+  font-size: 9px;
+  line-height: 1.4;
+}
+.case-fact strong {
+  display: block;
+  margin-top: 14px !important;
+  font-size: clamp(15px, 1.45vw, 21px) !important;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 900px) {
+  .case-facts {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .case-fact {
+    min-height: 0 !important;
+    padding: 18px 20px !important;
+  }
+  .case-fact strong {
+    margin-top: 10px !important;
+    font-size: 16px !important;
+  }
+}
