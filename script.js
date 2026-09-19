@@ -347,7 +347,7 @@ function setupParallax() {
   window.addEventListener("resize", requestUpdate);
 }
 
-function startOpeningMetal(canvas) {
+function startOpeningSand(canvas) {
   if (!canvas) return () => {};
   const context = canvas.getContext("2d", { alpha: false });
   if (!context) return () => {};
@@ -355,7 +355,7 @@ function startOpeningMetal(canvas) {
   let running = true;
   let width = 0;
   let height = 0;
-  let steam = [];
+  let particles = [];
   const startedAt = performance.now();
   const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
@@ -367,104 +367,51 @@ function startOpeningMetal(canvas) {
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    steam = Array.from({ length: Math.min(46, Math.max(20, Math.round(width / 28))) }, () => ({
+    const count = Math.min(240, Math.max(110, Math.round((width * height) / 6200)));
+    particles = Array.from({ length: count }, () => ({
       x: Math.random() * width,
-      y: height * (.42 + Math.random() * .6),
-      radius: 24 + Math.random() * 82,
-      speed: .12 + Math.random() * .36,
+      y: Math.random() * height,
+      speed: .22 + Math.random() * .92,
       drift: (Math.random() - .5) * .24,
-      alpha: .018 + Math.random() * .05,
+      wave: 4 + Math.random() * 22,
+      size: .35 + Math.random() * 1.05,
+      alpha: .12 + Math.random() * .56,
       phase: Math.random() * Math.PI * 2
     }));
     context.fillStyle = "#000";
     context.fillRect(0, 0, width, height);
   };
 
-  const drawMetalBand = (baseY, amplitude, speed, phase, topColor, bottomColor) => {
-    const gradient = context.createLinearGradient(0, baseY - amplitude * 2, 0, baseY + amplitude * 2.6);
-    gradient.addColorStop(0, topColor);
-    gradient.addColorStop(.28, "rgba(255,255,255,.16)");
-    gradient.addColorStop(.52, bottomColor);
-    gradient.addColorStop(.76, "rgba(255,255,255,.08)");
-    gradient.addColorStop(1, "rgba(0,0,0,.82)");
-    context.beginPath();
-    for (let x = -12; x <= width + 12; x += 7) {
-      const y = baseY
-        + Math.sin(x * .0065 + speed + phase) * amplitude
-        + Math.sin(x * .014 - speed * .7 + phase * .6) * amplitude * .36;
-      if (x === -12) context.moveTo(x, y);
-      else context.lineTo(x, y);
-    }
-    for (let x = width + 12; x >= -12; x -= 7) {
-      const y = baseY + amplitude * 1.18
-        + Math.sin(x * .0055 + speed * .82 + phase + 1.4) * amplitude * .64
-        + Math.sin(x * .017 - speed * .52) * amplitude * .22;
-      context.lineTo(x, y);
-    }
-    context.closePath();
-    context.fillStyle = gradient;
-    context.fill();
-  };
-
   const draw = (now) => {
     if (!running) return;
     const elapsed = now - startedAt;
-    const intro = Math.min(1, elapsed / 900);
-    const motion = elapsed * .00042;
+    const intro = Math.min(1, elapsed / 1250);
     context.globalCompositeOperation = "source-over";
-    context.fillStyle = "rgba(0,0,0,.14)";
+    context.fillStyle = "rgba(0,0,0,.12)";
     context.fillRect(0, 0, width, height);
     context.globalCompositeOperation = "lighter";
-
-    steam.forEach((cloud) => {
-      cloud.y -= cloud.speed;
-      cloud.x += cloud.drift + Math.sin(elapsed * .0007 + cloud.phase) * .08;
-      if (cloud.y < height * .24) {
-        cloud.y = height * .96;
-        cloud.x = Math.random() * width;
+    context.lineCap = "round";
+    particles.forEach((particle) => {
+      particle.x += particle.drift + Math.sin(elapsed * .00075 + particle.phase) * .08;
+      particle.y += particle.speed;
+      if (particle.y > height + 16) {
+        particle.y = -16;
+        particle.x = Math.random() * width;
       }
-      const alpha = cloud.alpha * intro;
-      const gradient = context.createRadialGradient(cloud.x, cloud.y, 0, cloud.x, cloud.y, cloud.radius);
-      gradient.addColorStop(0, "rgba(225,240,248," + alpha + ")");
-      gradient.addColorStop(.42, "rgba(130,162,178," + alpha * .52 + ")");
-      gradient.addColorStop(1, "rgba(0,0,0,0)");
-      context.fillStyle = gradient;
+      if (particle.x < -16) particle.x = width + 16;
+      if (particle.x > width + 16) particle.x = -16;
+      const waveX = Math.sin(elapsed * .0011 + particle.phase) * particle.wave * .08;
+      const alpha = particle.alpha * intro;
+      context.strokeStyle = "rgba(255,255,255," + alpha + ")";
+      context.lineWidth = particle.size;
       context.beginPath();
-      context.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2);
-      context.fill();
-    });
-
-    const startY = height * .5;
-    for (let index = 0; index < 12; index += 1) {
-      const y = startY + index * height * .045;
-      const amplitude = 7 + index * 2.3;
-      const phase = index * .68;
-      drawMetalBand(
-        y,
-        amplitude,
-        motion * (0.8 + index * .06),
-        phase,
-        index % 2 ? "rgba(210,222,230,.24)" : "rgba(244,248,251,.3)",
-        index % 2 ? "rgba(32,42,50,.72)" : "rgba(68,82,94,.66)"
+      context.moveTo(particle.x + waveX, particle.y);
+      context.lineTo(
+        particle.x + waveX - particle.drift * 5,
+        particle.y - particle.speed * (2 + particle.size * 1.7)
       );
-      context.beginPath();
-      for (let x = -10; x <= width + 10; x += 6) {
-        const lineY = y
-          + Math.sin(x * .007 + motion * (1 + index * .04) + phase) * amplitude
-          + Math.sin(x * .016 - motion * .6 + phase) * amplitude * .32;
-        if (x === -10) context.moveTo(x, lineY);
-        else context.lineTo(x, lineY);
-      }
-      context.strokeStyle = "rgba(235,248,255," + ((.075 + index * .004) * intro) + ")";
-      context.lineWidth = index % 3 === 0 ? 1.1 : .55;
       context.stroke();
-    }
-
-    context.globalCompositeOperation = "source-over";
-    context.fillStyle = "rgba(255,255,255," + (.018 * intro) + ")";
-    for (let y = 0; y < height; y += 4) {
-      context.fillRect(0, y, width, .45);
-    }
+    });
     frame = requestAnimationFrame(draw);
   };
 
@@ -492,7 +439,7 @@ function runOpeningAnimation() {
   root.style.scrollBehavior = "auto";
   window.scrollTo(0, 0);
   root.style.scrollBehavior = previousScrollBehavior;
-  const stopMetal = startOpeningMetal(document.querySelector("#opening-metal"));
+  const stopSand = startOpeningSand(document.querySelector("#opening-sand"));
   requestAnimationFrame(() => opening.classList.add("is-active"));
   window.setTimeout(() => opening.classList.add("is-formed"), 1900);
   window.setTimeout(() => {
@@ -500,7 +447,7 @@ function runOpeningAnimation() {
     root.classList.add("hero-entering");
   }, 3700);
   window.setTimeout(() => {
-    stopMetal();
+    stopSand();
     opening.remove();
     root.classList.remove("has-motion", "hero-entering");
     root.classList.add("opening-finished");
