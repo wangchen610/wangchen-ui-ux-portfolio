@@ -456,8 +456,20 @@ function startOpeningFlow(canvas) {
       if (alpha < .008) return;
       context.strokeStyle = "rgba(" + particle.color + "," + alpha + ")";
       context.lineWidth = particle.size;
+      let directionX = particle.x - particle.previousX;
+      let directionY = particle.y - particle.previousY;
+      const directionLength = Math.hypot(directionX, directionY);
+      if (directionLength < .08) {
+        directionX = particle.drift || .2;
+        directionY = particle.speed || .2;
+      }
+      const normalizedLength = Math.max(.001, Math.hypot(directionX, directionY));
+      const trailLength = 6 + particle.speed * 9;
       context.beginPath();
-      context.moveTo(particle.previousX, particle.previousY);
+      context.moveTo(
+        particle.x - (directionX / normalizedLength) * trailLength,
+        particle.y - (directionY / normalizedLength) * trailLength
+      );
       context.lineTo(particle.x, particle.y);
       context.stroke();
     });
