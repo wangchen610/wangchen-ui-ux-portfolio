@@ -903,4 +903,4 @@ setupCardSpotlight();
 setupPointerGlow();
 setupReveal();
 setupParallax();
-window.addEventListener("load", runOpeningAnimation, { once: true });
+runOpeningAnimation();
