@@ -2491,3 +2491,37 @@ html.has-motion body { overflow: hidden; }
 .opening-screen.is-active .opening-progress span {
   animation-duration: 4.3s !important;
 }
+
+
+/* ===== Guaranteed visible opening particle layer ===== */
+.opening-particle-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .9s ease;
+}
+.opening-screen.is-active .opening-particle-layer { opacity: .9; }
+.opening-screen.is-opening .opening-particle-layer { opacity: 0; }
+.opening-particle-layer i {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  display: block;
+  width: var(--length);
+  height: 1.6px;
+  border-radius: 999px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--particle-color), #fff);
+  box-shadow: 0 0 8px var(--particle-color), 0 0 18px color-mix(in srgb, var(--particle-color) 60%, transparent);
+  animation: openingParticleFlow var(--duration) linear var(--delay) infinite;
+  will-change: transform, opacity;
+}
+@keyframes openingParticleFlow {
+  0% { opacity: 0; transform: translate3d(-18vw, 0, 0) scaleX(.35); }
+  16% { opacity: var(--alpha); }
+  72% { opacity: var(--alpha); }
+  100% { opacity: 0; transform: translate3d(28vw, -8px, 0) scaleX(1); }
+}
