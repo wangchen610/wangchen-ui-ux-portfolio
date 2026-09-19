@@ -358,6 +358,39 @@ function startOpeningSand(canvas) {
   let particles = [];
   const startedAt = performance.now();
   const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const smooth = (value) => value * value * (3 - 2 * value);
+
+  const buildTargets = (count) => {
+    const offscreen = document.createElement("canvas");
+    offscreen.width = width;
+    offscreen.height = height;
+    const targetContext = offscreen.getContext("2d", { willReadFrequently: true });
+    if (!targetContext) return [];
+    const fontSize = Math.min(width * 0.115, height * 0.22, 142);
+    targetContext.fillStyle = "#fff";
+    targetContext.textAlign = "center";
+    targetContext.textBaseline = "middle";
+    targetContext.font = `900 ${fontSize}px "Arial Black", sans-serif`;
+    const label = "WANG CHEN";
+    const textWidth = targetContext.measureText(label).width;
+    const scale = Math.min(1, (width * 0.84) / textWidth);
+    targetContext.translate(width / 2, height / 2);
+    targetContext.scale(scale, scale);
+    targetContext.fillText(label, 0, 0);
+    targetContext.setTransform(1, 0, 0, 1, 0, 0);
+    const image = targetContext.getImageData(0, 0, width, height).data;
+    const points = [];
+    const step = width < 700 ? 4 : 5;
+    for (let y = 0; y < height; y += step) {
+      for (let x = 0; x < width; x += step) {
+        if (image[(y * width + x) * 4 + 3] > 100) points.push({ x, y });
+      }
+    }
+    if (!points.length) return [];
+    const stride = Math.max(1, Math.ceil(points.length / count));
+    return Array.from({ length: count }, (_, index) => points[(index * stride) % points.length]);
+  };
 
   const resize = () => {
     width = window.innerWidth;
@@ -367,43 +400,65 @@ function startOpeningSand(canvas) {
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(170, Math.max(70, Math.round((width * height) / 15000)));
-    particles = Array.from({ length: count }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      speed: .28 + Math.random() * 1.05,
-      drift: (Math.random() - .5) * .22,
-      size: .35 + Math.random() * 1.15,
-      alpha: .18 + Math.random() * .58,
-      phase: Math.random() * Math.PI * 2
-    }));
+    const count = Math.min(820, Math.max(280, Math.round((width * height) / 3100)));
+    const targets = buildTargets(count);
+    particles = Array.from({ length: count }, (_, index) => {
+      const target = targets[index % Math.max(targets.length, 1)] || { x: width / 2, y: height / 2 };
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        baseX: Math.random() * width,
+        speed: .22 + Math.random() * .82,
+        drift: (Math.random() - .5) * .18,
+        wave: 8 + Math.random() * 34,
+        size: .35 + Math.random() * 1.05,
+        alpha: .16 + Math.random() * .55,
+        phase: Math.random() * Math.PI * 2,
+        targetX: target.x,
+        targetY: target.y
+      };
+    });
     context.fillStyle = "#000";
     context.fillRect(0, 0, width, height);
   };
 
   const draw = (now) => {
     if (!running) return;
-    const intro = Math.min(1, (now - startedAt) / 1200);
+    const elapsed = (now - startedAt) / 1000;
+    const intro = clamp(elapsed / 1.15, 0, 1);
+    const morph = smooth(clamp((elapsed - 2.05) / 2.2, 0, 1));
     context.globalCompositeOperation = "source-over";
-    context.fillStyle = "rgba(0,0,0,.13)";
+    context.fillStyle = "rgba(0,0,0,.12)";
     context.fillRect(0, 0, width, height);
     context.globalCompositeOperation = "lighter";
     context.lineCap = "round";
     particles.forEach((particle) => {
-      particle.y += particle.speed;
-      particle.x += particle.drift + Math.sin(now * .00035 + particle.phase) * .12;
-      if (particle.y > height + 12) {
-        particle.y = -12;
-        particle.x = Math.random() * width;
+      if (morph < .02) {
+        particle.baseX += particle.drift;
+        particle.y += particle.speed;
+        particle.x = particle.baseX + Math.sin(elapsed * .85 + particle.phase) * particle.wave;
+        if (particle.y > height + 16) {
+          particle.y = -16;
+          particle.baseX = Math.random() * width;
+        }
+      } else {
+        const pull = .018 + morph * .075;
+        const waveStrength = (1 - morph) * 1.2;
+        particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.1 + particle.phase) * waveStrength;
+        particle.y += (particle.targetY - particle.y) * pull + (1 - morph) * particle.speed;
       }
-      if (particle.x < -12) particle.x = width + 12;
-      if (particle.x > width + 12) particle.x = -12;
-      const alpha = particle.alpha * intro;
+      const settle = morph > .88 ? 1 : 0;
+      const drawX = particle.x + (settle ? Math.sin(now * .0012 + particle.phase) * .28 : 0);
+      const drawY = particle.y + (settle ? Math.cos(now * .001 + particle.phase) * .22 : 0);
+      const alpha = particle.alpha * intro * (.52 + morph * .48);
       context.strokeStyle = "rgba(255,255,255," + alpha + ")";
       context.lineWidth = particle.size;
       context.beginPath();
-      context.moveTo(particle.x, particle.y);
-      context.lineTo(particle.x - particle.drift * 6, particle.y - particle.speed * (2 + particle.size * 1.8));
+      context.moveTo(drawX, drawY);
+      context.lineTo(
+        drawX - particle.drift * 5 - Math.sin(elapsed * .8 + particle.phase) * (1 - morph) * 2,
+        drawY - particle.speed * (1.8 + particle.size * 1.6) * (1 - morph * .5)
+      );
       context.stroke();
     });
     frame = requestAnimationFrame(draw);
@@ -438,14 +493,14 @@ function runOpeningAnimation() {
   window.setTimeout(() => {
     opening.classList.add("is-opening");
     root.classList.add("hero-entering");
-  }, 760);
-  window.setTimeout(() => opening.classList.add("is-complete"), 1460);
+  }, 4850);
+  window.setTimeout(() => opening.classList.add("is-complete"), 5100);
   window.setTimeout(() => {
     stopSand();
     opening.remove();
     root.classList.remove("has-motion", "hero-entering");
     root.classList.add("opening-finished");
-  }, 2820);
+  }, 6500);
 }
 
 function setupHeader() {

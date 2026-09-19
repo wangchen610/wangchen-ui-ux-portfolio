@@ -2413,3 +2413,24 @@ html.has-motion body { overflow: hidden; }
 .opening-screen.is-complete {
   transition: clip-path 1.2s cubic-bezier(.76, 0, .24, 1), visibility 0s linear 1.25s;
 }
+
+
+/* ===== Flowing sand typography timing ===== */
+.opening-brand {
+  opacity: 0 !important;
+  animation: none !important;
+  visibility: hidden !important;
+}
+.opening-screen.is-active .opening-sand {
+  opacity: .94;
+}
+.opening-screen.is-opening .opening-sand {
+  opacity: .34;
+  transition: opacity 1.15s ease;
+}
+.opening-screen.is-active .opening-progress span {
+  animation: techProgress 5.05s cubic-bezier(.22,.82,.3,1) .15s forwards !important;
+}
+.opening-screen.is-complete {
+  transition: clip-path 1.25s cubic-bezier(.76, 0, .24, 1), visibility 0s linear 1.3s !important;
+}
