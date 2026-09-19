@@ -2353,3 +2353,63 @@ html.has-motion body { overflow: hidden; }
     font-size: 16px !important;
   }
 }
+
+/* ===== White digital sand opening ===== */
+.opening-screen {
+  background: #000 !important;
+  color: #fff !important;
+}
+.opening-screen::before,
+.opening-screen::after {
+  display: none !important;
+}
+.opening-panels,
+.opening-grid-glow,
+.opening-hud-ring,
+.opening-scan {
+  display: none !important;
+}
+.opening-sand {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.15s ease;
+}
+.opening-screen.is-active .opening-sand {
+  opacity: .96;
+}
+.opening-brand {
+  z-index: 3;
+}
+.opening-brand span {
+  color: rgba(255,255,255,.72) !important;
+}
+.opening-brand strong {
+  color: #fff !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: 0 0 22px rgba(255,255,255,.18), 0 0 70px rgba(255,255,255,.07) !important;
+}
+.opening-brand em {
+  color: rgba(255,255,255,.62) !important;
+}
+.opening-coordinates,
+.opening-index {
+  color: rgba(255,255,255,.48) !important;
+}
+.opening-progress {
+  background: rgba(255,255,255,.12) !important;
+}
+.opening-progress span {
+  background: #fff !important;
+  box-shadow: 0 0 18px rgba(255,255,255,.5) !important;
+}
+.opening-screen.is-complete {
+  transition: clip-path 1.2s cubic-bezier(.76, 0, .24, 1), visibility 0s linear 1.25s;
+}

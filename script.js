@@ -347,6 +347,79 @@ function setupParallax() {
   window.addEventListener("resize", requestUpdate);
 }
 
+function startOpeningSand(canvas) {
+  if (!canvas) return () => {};
+  const context = canvas.getContext("2d", { alpha: false });
+  if (!context) return () => {};
+  let frame = null;
+  let running = true;
+  let width = 0;
+  let height = 0;
+  let particles = [];
+  const startedAt = performance.now();
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+
+  const resize = () => {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const count = Math.min(170, Math.max(70, Math.round((width * height) / 15000)));
+    particles = Array.from({ length: count }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      speed: .28 + Math.random() * 1.05,
+      drift: (Math.random() - .5) * .22,
+      size: .35 + Math.random() * 1.15,
+      alpha: .18 + Math.random() * .58,
+      phase: Math.random() * Math.PI * 2
+    }));
+    context.fillStyle = "#000";
+    context.fillRect(0, 0, width, height);
+  };
+
+  const draw = (now) => {
+    if (!running) return;
+    const intro = Math.min(1, (now - startedAt) / 1200);
+    context.globalCompositeOperation = "source-over";
+    context.fillStyle = "rgba(0,0,0,.13)";
+    context.fillRect(0, 0, width, height);
+    context.globalCompositeOperation = "lighter";
+    context.lineCap = "round";
+    particles.forEach((particle) => {
+      particle.y += particle.speed;
+      particle.x += particle.drift + Math.sin(now * .00035 + particle.phase) * .12;
+      if (particle.y > height + 12) {
+        particle.y = -12;
+        particle.x = Math.random() * width;
+      }
+      if (particle.x < -12) particle.x = width + 12;
+      if (particle.x > width + 12) particle.x = -12;
+      const alpha = particle.alpha * intro;
+      context.strokeStyle = "rgba(255,255,255," + alpha + ")";
+      context.lineWidth = particle.size;
+      context.beginPath();
+      context.moveTo(particle.x, particle.y);
+      context.lineTo(particle.x - particle.drift * 6, particle.y - particle.speed * (2 + particle.size * 1.8));
+      context.stroke();
+    });
+    frame = requestAnimationFrame(draw);
+  };
+
+  resize();
+  window.addEventListener("resize", resize, { passive: true });
+  frame = requestAnimationFrame(draw);
+  return () => {
+    running = false;
+    if (frame) cancelAnimationFrame(frame);
+    window.removeEventListener("resize", resize);
+    context.clearRect(0, 0, width, height);
+  };
+}
+
 function runOpeningAnimation() {
   const opening = document.querySelector("#opening-screen");
   const root = document.documentElement;
@@ -360,6 +433,7 @@ function runOpeningAnimation() {
   root.style.scrollBehavior = "auto";
   window.scrollTo(0, 0);
   root.style.scrollBehavior = previousScrollBehavior;
+  const stopSand = startOpeningSand(document.querySelector("#opening-sand"));
   requestAnimationFrame(() => opening.classList.add("is-active"));
   window.setTimeout(() => {
     opening.classList.add("is-opening");
@@ -367,6 +441,7 @@ function runOpeningAnimation() {
   }, 760);
   window.setTimeout(() => opening.classList.add("is-complete"), 1460);
   window.setTimeout(() => {
+    stopSand();
     opening.remove();
     root.classList.remove("has-motion", "hero-entering");
     root.classList.add("opening-finished");
