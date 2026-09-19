@@ -398,7 +398,7 @@ function startOpeningFlow(canvas) {
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(760, Math.max(340, Math.round((width * height) / 1280)));
+    const count = Math.min(1050, Math.max(480, Math.round((width * height) / 900)));
     const targets = textTargets(count);
     particles = Array.from({ length: count }, (_, index) => {
       const target = targets[index];
@@ -414,8 +414,8 @@ function startOpeningFlow(canvas) {
         wave: rand(8, 38),
         targetX: target.x,
         targetY: target.y,
-        size: rand(.42, 1.35),
-        alpha: rand(.16, .66),
+        size: rand(.9, 2.4),
+        alpha: rand(.3, .94),
         phase: Math.random() * Math.PI * 2,
         color: Math.round(54 + (199 - 54) * mix) + "," + Math.round(196 + (167 - 196) * mix) + ",255"
       };
@@ -464,7 +464,7 @@ function startOpeningFlow(canvas) {
         directionY = particle.speed || .2;
       }
       const normalizedLength = Math.max(.001, Math.hypot(directionX, directionY));
-      const trailLength = 6 + particle.speed * 9;
+      const trailLength = 18 + particle.speed * 24;
       context.beginPath();
       context.moveTo(
         particle.x - (directionX / normalizedLength) * trailLength,
