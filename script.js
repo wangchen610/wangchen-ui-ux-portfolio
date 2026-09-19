@@ -347,7 +347,7 @@ function setupParallax() {
   window.addEventListener("resize", requestUpdate);
 }
 
-function startOpeningWater(canvas) {
+function startOpeningMetal(canvas) {
   if (!canvas) return () => {};
   const context = canvas.getContext("2d", { alpha: false });
   if (!context) return () => {};
@@ -355,7 +355,7 @@ function startOpeningWater(canvas) {
   let running = true;
   let width = 0;
   let height = 0;
-  let glints = [];
+  let steam = [];
   const startedAt = performance.now();
   const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
@@ -367,63 +367,104 @@ function startOpeningWater(canvas) {
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(150, Math.max(70, Math.round(width / 8)));
-    glints = Array.from({ length: count }, () => ({
+    steam = Array.from({ length: Math.min(46, Math.max(20, Math.round(width / 28))) }, () => ({
       x: Math.random() * width,
-      y: height * (.38 + Math.random() * .56),
-      length: 2 + Math.random() * 10,
-      speed: .18 + Math.random() * .7,
-      alpha: .08 + Math.random() * .34,
+      y: height * (.42 + Math.random() * .6),
+      radius: 24 + Math.random() * 82,
+      speed: .12 + Math.random() * .36,
+      drift: (Math.random() - .5) * .24,
+      alpha: .018 + Math.random() * .05,
       phase: Math.random() * Math.PI * 2
     }));
     context.fillStyle = "#000";
     context.fillRect(0, 0, width, height);
   };
 
+  const drawMetalBand = (baseY, amplitude, speed, phase, topColor, bottomColor) => {
+    const gradient = context.createLinearGradient(0, baseY - amplitude * 2, 0, baseY + amplitude * 2.6);
+    gradient.addColorStop(0, topColor);
+    gradient.addColorStop(.28, "rgba(255,255,255,.16)");
+    gradient.addColorStop(.52, bottomColor);
+    gradient.addColorStop(.76, "rgba(255,255,255,.08)");
+    gradient.addColorStop(1, "rgba(0,0,0,.82)");
+    context.beginPath();
+    for (let x = -12; x <= width + 12; x += 7) {
+      const y = baseY
+        + Math.sin(x * .0065 + speed + phase) * amplitude
+        + Math.sin(x * .014 - speed * .7 + phase * .6) * amplitude * .36;
+      if (x === -12) context.moveTo(x, y);
+      else context.lineTo(x, y);
+    }
+    for (let x = width + 12; x >= -12; x -= 7) {
+      const y = baseY + amplitude * 1.18
+        + Math.sin(x * .0055 + speed * .82 + phase + 1.4) * amplitude * .64
+        + Math.sin(x * .017 - speed * .52) * amplitude * .22;
+      context.lineTo(x, y);
+    }
+    context.closePath();
+    context.fillStyle = gradient;
+    context.fill();
+  };
+
   const draw = (now) => {
     if (!running) return;
     const elapsed = now - startedAt;
-    const intro = Math.min(1, elapsed / 1100);
+    const intro = Math.min(1, elapsed / 900);
+    const motion = elapsed * .00042;
     context.globalCompositeOperation = "source-over";
-    context.fillStyle = "rgba(0,0,0,.11)";
+    context.fillStyle = "rgba(0,0,0,.14)";
     context.fillRect(0, 0, width, height);
     context.globalCompositeOperation = "lighter";
 
-    const horizon = height * .43;
-    for (let layer = 0; layer < 11; layer += 1) {
-      const baseY = horizon + layer * (height * .052);
-      const amplitude = 3 + layer * 1.35;
-      const speed = .00032 + layer * .000025;
+    steam.forEach((cloud) => {
+      cloud.y -= cloud.speed;
+      cloud.x += cloud.drift + Math.sin(elapsed * .0007 + cloud.phase) * .08;
+      if (cloud.y < height * .24) {
+        cloud.y = height * .96;
+        cloud.x = Math.random() * width;
+      }
+      const alpha = cloud.alpha * intro;
+      const gradient = context.createRadialGradient(cloud.x, cloud.y, 0, cloud.x, cloud.y, cloud.radius);
+      gradient.addColorStop(0, "rgba(225,240,248," + alpha + ")");
+      gradient.addColorStop(.42, "rgba(130,162,178," + alpha * .52 + ")");
+      gradient.addColorStop(1, "rgba(0,0,0,0)");
+      context.fillStyle = gradient;
+      context.beginPath();
+      context.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2);
+      context.fill();
+    });
+
+    const startY = height * .5;
+    for (let index = 0; index < 12; index += 1) {
+      const y = startY + index * height * .045;
+      const amplitude = 7 + index * 2.3;
+      const phase = index * .68;
+      drawMetalBand(
+        y,
+        amplitude,
+        motion * (0.8 + index * .06),
+        phase,
+        index % 2 ? "rgba(210,222,230,.24)" : "rgba(244,248,251,.3)",
+        index % 2 ? "rgba(32,42,50,.72)" : "rgba(68,82,94,.66)"
+      );
       context.beginPath();
       for (let x = -10; x <= width + 10; x += 6) {
-        const y = baseY
-          + Math.sin(x * .006 + elapsed * speed + layer * .72) * amplitude
-          + Math.sin(x * .0135 - elapsed * .00047 + layer * .36) * amplitude * .42;
-        if (x === -10) context.moveTo(x, y);
-        else context.lineTo(x, y);
+        const lineY = y
+          + Math.sin(x * .007 + motion * (1 + index * .04) + phase) * amplitude
+          + Math.sin(x * .016 - motion * .6 + phase) * amplitude * .32;
+        if (x === -10) context.moveTo(x, lineY);
+        else context.lineTo(x, lineY);
       }
-      context.strokeStyle = "rgba(218,244,255," + ((.035 + layer * .009) * intro) + ")";
-      context.lineWidth = layer % 3 === 0 ? 1.15 : .65;
+      context.strokeStyle = "rgba(235,248,255," + ((.075 + index * .004) * intro) + ")";
+      context.lineWidth = index % 3 === 0 ? 1.1 : .55;
       context.stroke();
     }
 
-    glints.forEach((glint) => {
-      glint.x += glint.speed;
-      if (glint.x > width + 16) {
-        glint.x = -16;
-        glint.y = height * (.38 + Math.random() * .56);
-      }
-      const shimmer = .45 + Math.sin(elapsed * .0018 + glint.phase) * .55;
-      const alpha = glint.alpha * intro * Math.max(.12, shimmer);
-      const y = glint.y + Math.sin(elapsed * .0011 + glint.phase) * 3;
-      context.strokeStyle = "rgba(255,255,255," + alpha + ")";
-      context.lineWidth = .65 + shimmer * .8;
-      context.beginPath();
-      context.moveTo(glint.x - glint.length * .5, y);
-      context.lineTo(glint.x + glint.length * .5, y + Math.sin(elapsed * .0013 + glint.phase) * 1.2);
-      context.stroke();
-    });
-
+    context.globalCompositeOperation = "source-over";
+    context.fillStyle = "rgba(255,255,255," + (.018 * intro) + ")";
+    for (let y = 0; y < height; y += 4) {
+      context.fillRect(0, y, width, .45);
+    }
     frame = requestAnimationFrame(draw);
   };
 
@@ -451,20 +492,19 @@ function runOpeningAnimation() {
   root.style.scrollBehavior = "auto";
   window.scrollTo(0, 0);
   root.style.scrollBehavior = previousScrollBehavior;
-  const stopWater = startOpeningWater(document.querySelector("#opening-water"));
+  const stopMetal = startOpeningMetal(document.querySelector("#opening-metal"));
   requestAnimationFrame(() => opening.classList.add("is-active"));
+  window.setTimeout(() => opening.classList.add("is-formed"), 1900);
   window.setTimeout(() => {
-    opening.classList.add("is-opening");
+    opening.classList.add("is-opening", "is-complete");
     root.classList.add("hero-entering");
-  }, 6050);
-  window.setTimeout(() => opening.classList.add("is-formed"), 3500);
-  window.setTimeout(() => opening.classList.add("is-complete"), 6250);
+  }, 3700);
   window.setTimeout(() => {
-    stopWater();
+    stopMetal();
     opening.remove();
     root.classList.remove("has-motion", "hero-entering");
     root.classList.add("opening-finished");
-  }, 7800);
+  }, 5000);
 }
 
 function setupHeader() {
