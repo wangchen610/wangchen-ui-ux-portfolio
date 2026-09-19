@@ -2369,7 +2369,7 @@ html.has-motion body { overflow: hidden; }
 .opening-scan {
   display: none !important;
 }
-.opening-sand {
+.opening-flow {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -2379,7 +2379,7 @@ html.has-motion body { overflow: hidden; }
   pointer-events: none;
   transition: opacity 1.15s ease;
 }
-.opening-screen.is-active .opening-sand {
+.opening-screen.is-active .opening-flow {
   opacity: .96;
 }
 .opening-brand {
@@ -2421,10 +2421,10 @@ html.has-motion body { overflow: hidden; }
   animation: none !important;
   visibility: hidden !important;
 }
-.opening-screen.is-active .opening-sand {
+.opening-screen.is-active .opening-flow {
   opacity: .94;
 }
-.opening-screen.is-opening .opening-sand {
+.opening-screen.is-opening .opening-flow {
   opacity: .34;
   transition: opacity 1.15s ease;
 }

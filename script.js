@@ -347,7 +347,7 @@ function setupParallax() {
   window.addEventListener("resize", requestUpdate);
 }
 
-function startOpeningSand(canvas) {
+function startOpeningFlow(canvas) {
   if (!canvas) return () => {};
   const context = canvas.getContext("2d", { alpha: false });
   if (!context) return () => {};
@@ -358,6 +358,37 @@ function startOpeningSand(canvas) {
   let particles = [];
   const startedAt = performance.now();
   const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const smooth = (value) => value * value * (3 - 2 * value);
+  const rand = (min, max) => min + Math.random() * (max - min);
+
+  const textTargets = (count) => {
+    const offscreen = document.createElement("canvas");
+    offscreen.width = width;
+    offscreen.height = height;
+    const targetContext = offscreen.getContext("2d", { willReadFrequently: true });
+    if (!targetContext) return [];
+    const fontSize = Math.min(width * .115, height * .2, 140);
+    targetContext.fillStyle = "#fff";
+    targetContext.textAlign = "center";
+    targetContext.textBaseline = "middle";
+    targetContext.font = `900 ${fontSize}px "Arial Black", sans-serif`;
+    const textWidth = targetContext.measureText("WANG CHEN").width;
+    const scale = Math.min(1, (width * .74) / textWidth);
+    targetContext.translate(width / 2, height / 2 - 10);
+    targetContext.scale(scale, scale);
+    targetContext.fillText("WANG CHEN", 0, 0);
+    targetContext.setTransform(1, 0, 0, 1, 0, 0);
+    const image = targetContext.getImageData(0, 0, width, height).data;
+    const points = [];
+    const step = width < 700 ? 4 : 5;
+    for (let y = 0; y < height; y += step) {
+      for (let x = 0; x < width; x += step) {
+        if (image[(y * width + x) * 4 + 3] > 100) points.push({ x, y });
+      }
+    }
+    return Array.from({ length: count }, (_, index) => points[(index * Math.max(1, Math.floor(points.length / count))) % points.length] || { x: width / 2, y: height / 2 });
+  };
 
   const resize = () => {
     width = window.innerWidth;
@@ -367,51 +398,92 @@ function startOpeningSand(canvas) {
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(240, Math.max(110, Math.round((width * height) / 6200)));
-    particles = Array.from({ length: count }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      speed: .22 + Math.random() * .92,
-      drift: (Math.random() - .5) * .24,
-      wave: 4 + Math.random() * 22,
-      size: .35 + Math.random() * 1.05,
-      alpha: .12 + Math.random() * .56,
-      phase: Math.random() * Math.PI * 2
-    }));
+    const count = Math.min(760, Math.max(340, Math.round((width * height) / 1280)));
+    const targets = textTargets(count);
+    particles = Array.from({ length: count }, (_, index) => {
+      const target = targets[index];
+      const mix = clamp(target.x / width);
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        previousX: Math.random() * width,
+        previousY: Math.random() * height,
+        baseX: Math.random() * width,
+        speed: rand(.2, .88),
+        drift: rand(-.24, .24),
+        wave: rand(8, 38),
+        targetX: target.x,
+        targetY: target.y,
+        size: rand(.42, 1.35),
+        alpha: rand(.16, .66),
+        phase: Math.random() * Math.PI * 2,
+        color: Math.round(54 + (199 - 54) * mix) + "," + Math.round(196 + (167 - 196) * mix) + ",255"
+      };
+    });
     context.fillStyle = "#000";
     context.fillRect(0, 0, width, height);
   };
 
   const draw = (now) => {
     if (!running) return;
-    const elapsed = now - startedAt;
-    const intro = Math.min(1, elapsed / 1250);
+    const elapsed = (now - startedAt) / 1000;
+    const intro = clamp(elapsed / .8, 0, 1);
+    const morph = smooth(clamp((elapsed - .45) / 2.82, 0, 1));
     context.globalCompositeOperation = "source-over";
-    context.fillStyle = "rgba(0,0,0,.12)";
+    context.fillStyle = "rgba(0,0,0,.14)";
     context.fillRect(0, 0, width, height);
     context.globalCompositeOperation = "lighter";
     context.lineCap = "round";
     particles.forEach((particle) => {
-      particle.x += particle.drift + Math.sin(elapsed * .00075 + particle.phase) * .08;
-      particle.y += particle.speed;
-      if (particle.y > height + 16) {
-        particle.y = -16;
-        particle.x = Math.random() * width;
+      particle.previousX = particle.x;
+      particle.previousY = particle.y;
+      if (morph < .02) {
+        particle.baseX += particle.drift;
+        particle.y += particle.speed;
+        particle.x = particle.baseX + Math.sin(elapsed * .92 + particle.phase) * particle.wave;
+        if (particle.y > height + 18) {
+          particle.y = -18;
+          particle.baseX = Math.random() * width;
+        }
+      } else {
+        const pull = .042 + morph * .13;
+        const turbulence = 1 - morph;
+        particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.18 + particle.phase) * turbulence * .68;
+        particle.y += (particle.targetY - particle.y) * pull + Math.cos(elapsed * .94 + particle.phase) * turbulence * .46;
       }
-      if (particle.x < -16) particle.x = width + 16;
-      if (particle.x > width + 16) particle.x = -16;
-      const waveX = Math.sin(elapsed * .0011 + particle.phase) * particle.wave * .08;
-      const alpha = particle.alpha * intro;
-      context.strokeStyle = "rgba(255,255,255," + alpha + ")";
+      const particleFade = 1 - smooth(clamp((morph - .78) / .18, 0, 1));
+      const alpha = particle.alpha * (.5 + morph * .5) * intro * particleFade;
+      if (alpha < .008) return;
+      context.strokeStyle = "rgba(" + particle.color + "," + alpha + ")";
       context.lineWidth = particle.size;
       context.beginPath();
-      context.moveTo(particle.x + waveX, particle.y);
-      context.lineTo(
-        particle.x + waveX - particle.drift * 5,
-        particle.y - particle.speed * (2 + particle.size * 1.7)
-      );
+      context.moveTo(particle.previousX, particle.previousY);
+      context.lineTo(particle.x, particle.y);
       context.stroke();
     });
+
+    if (morph > .72) {
+      const reveal = smooth(clamp((morph - .72) / .2, 0, 1));
+      const drift = Math.sin(elapsed * 1.35) * width * .055;
+      context.save();
+      context.globalCompositeOperation = "screen";
+      context.globalAlpha = reveal * .76;
+      const textGradient = context.createLinearGradient(width * .1 + drift, 0, width * .9 + drift, 0);
+      textGradient.addColorStop(0, "#25b7ff");
+      textGradient.addColorStop(.46, "#7b8cff");
+      textGradient.addColorStop(1, "#c9a7ff");
+      context.fillStyle = textGradient;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      const fontSize = Math.min(width * .115, height * .2, 140);
+      context.font = `900 ${fontSize}px "Arial Black", sans-serif`;
+      const textWidth = context.measureText("WANG CHEN").width;
+      const textScale = Math.min(1, (width * .74) / textWidth);
+      context.translate(width / 2, height / 2 - 10);
+      context.scale(textScale, textScale);
+      context.fillText("WANG CHEN", 0, 0);
+      context.restore();
+    }
     frame = requestAnimationFrame(draw);
   };
 
@@ -439,15 +511,15 @@ function runOpeningAnimation() {
   root.style.scrollBehavior = "auto";
   window.scrollTo(0, 0);
   root.style.scrollBehavior = previousScrollBehavior;
-  const stopSand = startOpeningSand(document.querySelector("#opening-sand"));
+  const stopFlow = startOpeningFlow(document.querySelector("#opening-flow"));
   requestAnimationFrame(() => opening.classList.add("is-active"));
-  window.setTimeout(() => opening.classList.add("is-formed"), 1900);
+  window.setTimeout(() => opening.classList.add("is-formed"), 3150);
   window.setTimeout(() => {
     opening.classList.add("is-opening", "is-complete");
     root.classList.add("hero-entering");
   }, 3700);
   window.setTimeout(() => {
-    stopSand();
+    stopFlow();
     opening.remove();
     root.classList.remove("has-motion", "hero-entering");
     root.classList.add("opening-finished");
