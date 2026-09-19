@@ -2434,3 +2434,15 @@ html.has-motion body { overflow: hidden; }
 .opening-screen.is-complete {
   transition: clip-path 1.25s cubic-bezier(.76, 0, .24, 1), visibility 0s linear 1.3s !important;
 }
+
+
+/* Header resume CTA white text and icon */
+.header-cta,
+.header-cta:hover {
+  color: #fff !important;
+}
+.header-cta svg {
+  color: #fff !important;
+  stroke: #fff !important;
+  fill: none !important;
+}
