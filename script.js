@@ -367,14 +367,14 @@ function startOpeningSand(canvas) {
     offscreen.height = height;
     const targetContext = offscreen.getContext("2d", { willReadFrequently: true });
     if (!targetContext) return [];
-    const fontSize = Math.min(width * 0.115, height * 0.22, 142);
+    const fontSize = Math.min(width * 0.3, height * 0.42, 320);
     targetContext.fillStyle = "#fff";
     targetContext.textAlign = "center";
     targetContext.textBaseline = "middle";
     targetContext.font = `900 ${fontSize}px "Arial Black", sans-serif`;
-    const label = "WANG CHEN";
+    const label = "WC";
     const textWidth = targetContext.measureText(label).width;
-    const scale = Math.min(1, (width * 0.84) / textWidth);
+    const scale = Math.min(1, (width * 0.42) / textWidth, (height * 0.58) / fontSize);
     targetContext.translate(width / 2, height / 2);
     targetContext.scale(scale, scale);
     targetContext.fillText(label, 0, 0);
@@ -426,7 +426,7 @@ function startOpeningSand(canvas) {
     if (!running) return;
     const elapsed = (now - startedAt) / 1000;
     const intro = clamp(elapsed / 1.15, 0, 1);
-    const morph = smooth(clamp((elapsed - 2.05) / 2.2, 0, 1));
+    const morph = smooth(clamp((elapsed - 1.65) / 1.75, 0, 1));
     context.globalCompositeOperation = "source-over";
     context.fillStyle = "rgba(0,0,0,.12)";
     context.fillRect(0, 0, width, height);
@@ -442,7 +442,7 @@ function startOpeningSand(canvas) {
           particle.baseX = Math.random() * width;
         }
       } else {
-        const pull = .018 + morph * .075;
+        const pull = .028 + morph * .095;
         const waveStrength = (1 - morph) * 1.2;
         particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.1 + particle.phase) * waveStrength;
         particle.y += (particle.targetY - particle.y) * pull + (1 - morph) * particle.speed;
@@ -493,14 +493,15 @@ function runOpeningAnimation() {
   window.setTimeout(() => {
     opening.classList.add("is-opening");
     root.classList.add("hero-entering");
-  }, 4850);
-  window.setTimeout(() => opening.classList.add("is-complete"), 5100);
+  }, 6050);
+  window.setTimeout(() => opening.classList.add("is-formed"), 3500);
+  window.setTimeout(() => opening.classList.add("is-complete"), 6250);
   window.setTimeout(() => {
     stopSand();
     opening.remove();
     root.classList.remove("has-motion", "hero-entering");
     root.classList.add("opening-finished");
-  }, 6500);
+  }, 7800);
 }
 
 function setupHeader() {
