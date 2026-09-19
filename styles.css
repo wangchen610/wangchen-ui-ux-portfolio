@@ -2525,3 +2525,13 @@ html.has-motion body { overflow: hidden; }
   72% { opacity: var(--alpha); }
   100% { opacity: 0; transform: translate3d(28vw, -8px, 0) scaleX(1); }
 }
+
+
+/* ===== Prevent hero text reflow during opening transition ===== */
+.hero-title .title-line {
+  white-space: nowrap;
+}
+.has-motion.opening-finished body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}

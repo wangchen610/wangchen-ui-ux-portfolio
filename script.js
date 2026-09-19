@@ -561,9 +561,12 @@ function runOpeningAnimation() {
   window.setTimeout(() => {
     stopFlow();
     opening.remove();
-    root.classList.remove("has-motion", "hero-entering");
     root.classList.add("opening-finished");
   }, 5000);
+  window.setTimeout(() => {
+    root.classList.remove("has-motion", "hero-entering");
+    root.classList.add("opening-finished");
+  }, 6500);
 }
 
 function setupHeader() {
