@@ -347,7 +347,7 @@ function setupParallax() {
   window.addEventListener("resize", requestUpdate);
 }
 
-function startOpeningSand(canvas) {
+function startOpeningWater(canvas) {
   if (!canvas) return () => {};
   const context = canvas.getContext("2d", { alpha: false });
   if (!context) return () => {};
@@ -355,42 +355,9 @@ function startOpeningSand(canvas) {
   let running = true;
   let width = 0;
   let height = 0;
-  let particles = [];
+  let glints = [];
   const startedAt = performance.now();
   const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  const smooth = (value) => value * value * (3 - 2 * value);
-
-  const buildTargets = (count) => {
-    const offscreen = document.createElement("canvas");
-    offscreen.width = width;
-    offscreen.height = height;
-    const targetContext = offscreen.getContext("2d", { willReadFrequently: true });
-    if (!targetContext) return [];
-    const fontSize = Math.min(width * 0.3, height * 0.42, 320);
-    targetContext.fillStyle = "#fff";
-    targetContext.textAlign = "center";
-    targetContext.textBaseline = "middle";
-    targetContext.font = `900 ${fontSize}px "Arial Black", sans-serif`;
-    const label = "WC";
-    const textWidth = targetContext.measureText(label).width;
-    const scale = Math.min(1, (width * 0.42) / textWidth, (height * 0.58) / fontSize);
-    targetContext.translate(width / 2, height / 2);
-    targetContext.scale(scale, scale);
-    targetContext.fillText(label, 0, 0);
-    targetContext.setTransform(1, 0, 0, 1, 0, 0);
-    const image = targetContext.getImageData(0, 0, width, height).data;
-    const points = [];
-    const step = width < 700 ? 4 : 5;
-    for (let y = 0; y < height; y += step) {
-      for (let x = 0; x < width; x += step) {
-        if (image[(y * width + x) * 4 + 3] > 100) points.push({ x, y });
-      }
-    }
-    if (!points.length) return [];
-    const stride = Math.max(1, Math.ceil(points.length / count));
-    return Array.from({ length: count }, (_, index) => points[(index * stride) % points.length]);
-  };
 
   const resize = () => {
     width = window.innerWidth;
@@ -400,67 +367,63 @@ function startOpeningSand(canvas) {
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(820, Math.max(280, Math.round((width * height) / 3100)));
-    const targets = buildTargets(count);
-    particles = Array.from({ length: count }, (_, index) => {
-      const target = targets[index % Math.max(targets.length, 1)] || { x: width / 2, y: height / 2 };
-      return {
-        x: Math.random() * width,
-        y: Math.random() * height,
-        baseX: Math.random() * width,
-        speed: .22 + Math.random() * .82,
-        drift: (Math.random() - .5) * .18,
-        wave: 8 + Math.random() * 34,
-        size: .35 + Math.random() * 1.05,
-        alpha: .16 + Math.random() * .55,
-        phase: Math.random() * Math.PI * 2,
-        targetX: target.x,
-        targetY: target.y
-      };
-    });
+    const count = Math.min(150, Math.max(70, Math.round(width / 8)));
+    glints = Array.from({ length: count }, () => ({
+      x: Math.random() * width,
+      y: height * (.38 + Math.random() * .56),
+      length: 2 + Math.random() * 10,
+      speed: .18 + Math.random() * .7,
+      alpha: .08 + Math.random() * .34,
+      phase: Math.random() * Math.PI * 2
+    }));
     context.fillStyle = "#000";
     context.fillRect(0, 0, width, height);
   };
 
   const draw = (now) => {
     if (!running) return;
-    const elapsed = (now - startedAt) / 1000;
-    const intro = clamp(elapsed / 1.15, 0, 1);
-    const morph = smooth(clamp((elapsed - 1.65) / 1.75, 0, 1));
+    const elapsed = now - startedAt;
+    const intro = Math.min(1, elapsed / 1100);
     context.globalCompositeOperation = "source-over";
-    context.fillStyle = "rgba(0,0,0,.12)";
+    context.fillStyle = "rgba(0,0,0,.11)";
     context.fillRect(0, 0, width, height);
     context.globalCompositeOperation = "lighter";
-    context.lineCap = "round";
-    particles.forEach((particle) => {
-      if (morph < .02) {
-        particle.baseX += particle.drift;
-        particle.y += particle.speed;
-        particle.x = particle.baseX + Math.sin(elapsed * .85 + particle.phase) * particle.wave;
-        if (particle.y > height + 16) {
-          particle.y = -16;
-          particle.baseX = Math.random() * width;
-        }
-      } else {
-        const pull = .028 + morph * .095;
-        const waveStrength = (1 - morph) * 1.2;
-        particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.1 + particle.phase) * waveStrength;
-        particle.y += (particle.targetY - particle.y) * pull + (1 - morph) * particle.speed;
-      }
-      const settle = morph > .88 ? 1 : 0;
-      const drawX = particle.x + (settle ? Math.sin(now * .0012 + particle.phase) * .28 : 0);
-      const drawY = particle.y + (settle ? Math.cos(now * .001 + particle.phase) * .22 : 0);
-      const alpha = particle.alpha * intro * (.52 + morph * .48);
-      context.strokeStyle = "rgba(255,255,255," + alpha + ")";
-      context.lineWidth = particle.size;
+
+    const horizon = height * .43;
+    for (let layer = 0; layer < 11; layer += 1) {
+      const baseY = horizon + layer * (height * .052);
+      const amplitude = 3 + layer * 1.35;
+      const speed = .00032 + layer * .000025;
       context.beginPath();
-      context.moveTo(drawX, drawY);
-      context.lineTo(
-        drawX - particle.drift * 5 - Math.sin(elapsed * .8 + particle.phase) * (1 - morph) * 2,
-        drawY - particle.speed * (1.8 + particle.size * 1.6) * (1 - morph * .5)
-      );
+      for (let x = -10; x <= width + 10; x += 6) {
+        const y = baseY
+          + Math.sin(x * .006 + elapsed * speed + layer * .72) * amplitude
+          + Math.sin(x * .0135 - elapsed * .00047 + layer * .36) * amplitude * .42;
+        if (x === -10) context.moveTo(x, y);
+        else context.lineTo(x, y);
+      }
+      context.strokeStyle = "rgba(218,244,255," + ((.035 + layer * .009) * intro) + ")";
+      context.lineWidth = layer % 3 === 0 ? 1.15 : .65;
+      context.stroke();
+    }
+
+    glints.forEach((glint) => {
+      glint.x += glint.speed;
+      if (glint.x > width + 16) {
+        glint.x = -16;
+        glint.y = height * (.38 + Math.random() * .56);
+      }
+      const shimmer = .45 + Math.sin(elapsed * .0018 + glint.phase) * .55;
+      const alpha = glint.alpha * intro * Math.max(.12, shimmer);
+      const y = glint.y + Math.sin(elapsed * .0011 + glint.phase) * 3;
+      context.strokeStyle = "rgba(255,255,255," + alpha + ")";
+      context.lineWidth = .65 + shimmer * .8;
+      context.beginPath();
+      context.moveTo(glint.x - glint.length * .5, y);
+      context.lineTo(glint.x + glint.length * .5, y + Math.sin(elapsed * .0013 + glint.phase) * 1.2);
       context.stroke();
     });
+
     frame = requestAnimationFrame(draw);
   };
 
@@ -488,7 +451,7 @@ function runOpeningAnimation() {
   root.style.scrollBehavior = "auto";
   window.scrollTo(0, 0);
   root.style.scrollBehavior = previousScrollBehavior;
-  const stopSand = startOpeningSand(document.querySelector("#opening-sand"));
+  const stopWater = startOpeningWater(document.querySelector("#opening-water"));
   requestAnimationFrame(() => opening.classList.add("is-active"));
   window.setTimeout(() => {
     opening.classList.add("is-opening");
@@ -497,7 +460,7 @@ function runOpeningAnimation() {
   window.setTimeout(() => opening.classList.add("is-formed"), 3500);
   window.setTimeout(() => opening.classList.add("is-complete"), 6250);
   window.setTimeout(() => {
-    stopSand();
+    stopWater();
     opening.remove();
     root.classList.remove("has-motion", "hero-entering");
     root.classList.add("opening-finished");
