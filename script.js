@@ -454,8 +454,6 @@ function startOpeningFlow(canvas) {
       const particleFade = 1 - smooth(clamp((morph - .78) / .18, 0, 1));
       const alpha = particle.alpha * (.5 + morph * .5) * intro * particleFade;
       if (alpha < .008) return;
-      context.strokeStyle = "rgba(" + particle.color + "," + alpha + ")";
-      context.lineWidth = particle.size;
       let directionX = particle.x - particle.previousX;
       let directionY = particle.y - particle.previousY;
       const directionLength = Math.hypot(directionX, directionY);
@@ -465,11 +463,18 @@ function startOpeningFlow(canvas) {
       }
       const normalizedLength = Math.max(.001, Math.hypot(directionX, directionY));
       const trailLength = 18 + particle.speed * 24;
+      const startX = particle.x - (directionX / normalizedLength) * trailLength;
+      const startY = particle.y - (directionY / normalizedLength) * trailLength;
+      context.strokeStyle = "rgba(" + particle.color + "," + alpha * .24 + ")";
+      context.lineWidth = particle.size * 3.1;
       context.beginPath();
-      context.moveTo(
-        particle.x - (directionX / normalizedLength) * trailLength,
-        particle.y - (directionY / normalizedLength) * trailLength
-      );
+      context.moveTo(startX, startY);
+      context.lineTo(particle.x, particle.y);
+      context.stroke();
+      context.strokeStyle = "rgba(" + particle.color + "," + alpha + ")";
+      context.lineWidth = Math.max(1, particle.size * .85);
+      context.beginPath();
+      context.moveTo(startX, startY);
       context.lineTo(particle.x, particle.y);
       context.stroke();
     });
