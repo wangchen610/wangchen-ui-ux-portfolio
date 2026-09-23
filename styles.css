@@ -2792,3 +2792,57 @@ body::before {
     width: min(72vw, 280px);
   }
 }
+
+
+/* ===== B-end card hover: lower ambient glow ===== */
+.stats-strip .stat {
+  --card-accent: #1687ff;
+  --card-accent-rgb: 22,135,255;
+}
+.project-card,
+.stats-strip .stat {
+  transition:
+    transform .34s cubic-bezier(.2,.8,.2,1),
+    box-shadow .3s ease,
+    border-color .25s ease,
+    background-color .3s ease;
+}
+.project-card::after,
+.stats-strip .stat::after {
+  top: auto;
+  right: 11%;
+  bottom: 0;
+  left: 11%;
+  width: auto;
+  height: 2px;
+  border-radius: 999px;
+  transform: scaleX(0);
+  transform-origin: center;
+  background: linear-gradient(90deg, transparent, var(--card-accent, #1687ff) 34%, #62c9c5 68%, transparent);
+  box-shadow: 0 0 12px rgba(var(--card-accent-rgb, 22,135,255), .28);
+}
+.project-card:hover,
+.stats-strip .stat:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 28px rgba(var(--card-accent-rgb, 22,135,255), .1),
+    0 4px 12px rgba(12,36,60,.055);
+}
+.project-card:hover::after,
+.stats-strip .stat:hover::after {
+  transform: scaleX(1);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .project-card:hover,
+  .stats-strip .stat:hover {
+    transform: none;
+    box-shadow:
+      0 10px 24px rgba(var(--card-accent-rgb, 22,135,255), .075),
+      0 3px 9px rgba(12,36,60,.045);
+  }
+  .project-card:hover::after,
+  .stats-strip .stat:hover::after {
+    transform: scaleX(0);
+  }
+}
