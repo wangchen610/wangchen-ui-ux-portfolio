@@ -357,7 +357,7 @@ function startOpeningFlow(canvas) {
   let height = 0;
   let particles = [];
   const startedAt = performance.now();
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth > 900 ? 1.25 : 1.5);
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const smooth = (value) => value * value * (3 - 2 * value);
   const rand = (min, max) => min + Math.random() * (max - min);
@@ -398,7 +398,7 @@ function startOpeningFlow(canvas) {
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(1150, Math.max(620, Math.round((width * height) / 760)));
+    const count = Math.min(900, Math.max(520, Math.round((width * height) / 980)));
     const targets = textTargets(count);
     particles = Array.from({ length: count }, (_, index) => {
       const target = targets[index];
@@ -411,8 +411,8 @@ function startOpeningFlow(canvas) {
         wave: rand(6, 28),
         targetX: target.x,
         targetY: target.y,
-        size: rand(.16, .46),
-        alpha: rand(.16, .5),
+        size: rand(.12, .34),
+        alpha: rand(.18, .48),
         delay: rand(0, .25),
         phase: Math.random() * Math.PI * 2,
         color: Math.random() > .74 ? "255,255,255" : Math.random() > .42 ? "102,221,255" : "114,166,255"
@@ -433,7 +433,6 @@ function startOpeningFlow(canvas) {
     context.lineCap = "round";
     particles.forEach((particle) => {
       const morph = smooth(clamp((elapsed - .72 - particle.delay) / 2.05, 0, 1));
-      const locked = elapsed > 3.28;
       const previousX = particle.x;
       const previousY = particle.y;
       if (morph < .015) {
@@ -444,15 +443,12 @@ function startOpeningFlow(canvas) {
           particle.y = -20;
           particle.baseX = Math.random() * width;
         }
-      } else if (locked) {
-        particle.x = particle.targetX + Math.sin(elapsed * 2.1 + particle.phase) * .08;
-        particle.y = particle.targetY + Math.cos(elapsed * 1.9 + particle.phase) * .08;
       } else {
-        const pause = elapsed < 1.15 ? .18 : 1;
-        const pull = (.04 + morph * .18) * pause;
+        const pause = elapsed < 1.05 ? .22 : 1;
+        const pull = (.028 + morph * .12) * pause;
         const turbulence = (1 - morph) * (1 - morph);
-        particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.4 + particle.phase) * turbulence * .7;
-        particle.y += (particle.targetY - particle.y) * pull + Math.cos(elapsed * 1.08 + particle.phase) * turbulence * .48;
+        particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.28 + particle.phase) * turbulence * .58;
+        particle.y += (particle.targetY - particle.y) * pull + Math.cos(elapsed * .98 + particle.phase) * turbulence * .4;
       }
       let directionX = particle.x - previousX;
       let directionY = particle.y - previousY;
@@ -465,15 +461,9 @@ function startOpeningFlow(canvas) {
       const trailLength = 2 + particle.speed * 4;
       const startX = particle.x - (directionX / normalizedLength) * trailLength;
       const startY = particle.y - (directionY / normalizedLength) * trailLength;
-      const opacity = particle.alpha * intro * (.75 + morph * .25);
-      context.strokeStyle = "rgba(" + particle.color + "," + opacity * .26 + ")";
-      context.lineWidth = Math.max(.45, particle.size * 1.25);
-      context.beginPath();
-      context.moveTo(startX, startY);
-      context.lineTo(particle.x, particle.y);
-      context.stroke();
+      const opacity = particle.alpha * intro * (.72 + morph * .28);
       context.strokeStyle = "rgba(" + particle.color + "," + opacity + ")";
-      context.lineWidth = Math.max(.24, particle.size * .5);
+      context.lineWidth = Math.max(.22, particle.size * .52);
       context.beginPath();
       context.moveTo(startX, startY);
       context.lineTo(particle.x, particle.y);
@@ -513,7 +503,7 @@ function runOpeningAnimation() {
   window.setTimeout(() => {
     opening.classList.add("is-opening", "is-complete");
     root.classList.add("hero-entering");
-  }, 3700);
+  }, 4300);
   window.setTimeout(() => {
     stopFlow();
     opening.remove();
