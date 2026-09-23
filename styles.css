@@ -2535,3 +2535,9 @@ html.has-motion body { overflow: hidden; }
   overflow-x: hidden;
   overflow-y: auto;
 }
+
+
+/* Tech-style particle-only opening */
+.opening-particle-layer {
+  display: none !important;
+}

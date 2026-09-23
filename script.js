@@ -476,27 +476,6 @@ function startOpeningFlow(canvas) {
       context.stroke();
     });
 
-    if (elapsed > 2.7) {
-      const reveal = smooth(clamp((elapsed - 2.7) / 1.0, 0, 1));
-      context.save();
-      context.globalCompositeOperation = "screen";
-      context.globalAlpha = reveal * .08;
-      const gradient = context.createLinearGradient(width * .18, 0, width * .82, 0);
-      gradient.addColorStop(0, "#63dcff");
-      gradient.addColorStop(.5, "#b8ebff");
-      gradient.addColorStop(1, "#9a9cff");
-      context.fillStyle = gradient;
-      context.textAlign = "center";
-      context.textBaseline = "middle";
-      const fontSize = Math.min(width * .095, height * .17, 120);
-      context.font = `900 ${fontSize}px "Arial Black", sans-serif`;
-      const textWidth = context.measureText("WANG CHEN").width;
-      const textScale = Math.min(1, (width * .62) / textWidth);
-      context.translate(width / 2, height / 2 - 8);
-      context.scale(textScale, textScale);
-      context.fillText("WANG CHEN", 0, 0);
-      context.restore();
-    }
     frame = requestAnimationFrame(draw);
   };
 
@@ -520,29 +499,6 @@ function runOpeningAnimation() {
     root.classList.add("opening-finished");
     return;
   }
-  if (!opening.querySelector(".opening-particle-layer")) {
-    const layer = document.createElement("div");
-    layer.className = "opening-particle-layer";
-    layer.setAttribute("aria-hidden", "true");
-    for (let index = 0; index < 34; index += 1) {
-      const particle = document.createElement("i");
-      const palette = index % 4 === 0
-        ? "rgba(255,255,255,.95)"
-        : index % 3 === 0
-          ? "rgba(164,108,255,.92)"
-          : "rgba(83,214,255,.94)";
-      particle.style.setProperty("--x", (4 + Math.random() * 92).toFixed(2) + "%");
-      particle.style.setProperty("--y", (8 + Math.random() * 84).toFixed(2) + "%");
-      particle.style.setProperty("--duration", (1.5 + Math.random() * 1.9).toFixed(2) + "s");
-      particle.style.setProperty("--delay", (-Math.random() * 3).toFixed(2) + "s");
-      particle.style.setProperty("--length", (24 + Math.random() * 78).toFixed(0) + "px");
-      particle.style.setProperty("--alpha", (.28 + Math.random() * .62).toFixed(2));
-      particle.style.setProperty("--particle-color", palette);
-      layer.appendChild(particle);
-    }
-    opening.appendChild(layer);
-  }
-
   const previousScrollBehavior = root.style.scrollBehavior;
   root.style.scrollBehavior = "auto";
   window.scrollTo(0, 0);
