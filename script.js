@@ -432,7 +432,8 @@ function startOpeningFlow(canvas) {
     context.globalCompositeOperation = "lighter";
     context.lineCap = "round";
     particles.forEach((particle) => {
-      const morph = smooth(clamp((elapsed - .8 - particle.delay) / 2.2, 0, 1));
+      const morph = smooth(clamp((elapsed - .72 - particle.delay) / 2.05, 0, 1));
+      const locked = elapsed > 3.28;
       const previousX = particle.x;
       const previousY = particle.y;
       if (morph < .015) {
@@ -443,12 +444,15 @@ function startOpeningFlow(canvas) {
           particle.y = -20;
           particle.baseX = Math.random() * width;
         }
+      } else if (locked) {
+        particle.x = particle.targetX + Math.sin(elapsed * 2.1 + particle.phase) * .08;
+        particle.y = particle.targetY + Math.cos(elapsed * 1.9 + particle.phase) * .08;
       } else {
         const pause = elapsed < 1.15 ? .18 : 1;
-        const pull = (.035 + morph * .12) * pause;
+        const pull = (.04 + morph * .18) * pause;
         const turbulence = (1 - morph) * (1 - morph);
-        particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.4 + particle.phase) * turbulence * .75;
-        particle.y += (particle.targetY - particle.y) * pull + Math.cos(elapsed * 1.08 + particle.phase) * turbulence * .52;
+        particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.4 + particle.phase) * turbulence * .7;
+        particle.y += (particle.targetY - particle.y) * pull + Math.cos(elapsed * 1.08 + particle.phase) * turbulence * .48;
       }
       let directionX = particle.x - previousX;
       let directionY = particle.y - previousY;
@@ -505,7 +509,7 @@ function runOpeningAnimation() {
   root.style.scrollBehavior = previousScrollBehavior;
   const stopFlow = startOpeningFlow(document.querySelector("#opening-flow"));
   requestAnimationFrame(() => opening.classList.add("is-active"));
-  window.setTimeout(() => opening.classList.add("is-formed"), 3200);
+  window.setTimeout(() => opening.classList.add("is-formed"), 3300);
   window.setTimeout(() => {
     opening.classList.add("is-opening", "is-complete");
     root.classList.add("hero-entering");

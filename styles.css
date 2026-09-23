@@ -2541,3 +2541,25 @@ html.has-motion body { overflow: hidden; }
 .opening-particle-layer {
   display: none !important;
 }
+
+
+/* ===== Reduced global display type scale ===== */
+.hero h1 {
+  font-size: clamp(40px, 4.85vw, 79px) !important;
+}
+.section-head h2,
+.about-sticky h2 {
+  font-size: clamp(37px, 4.35vw, 66px) !important;
+}
+.contact-main h2 {
+  font-size: clamp(44px, 5.9vw, 92px) !important;
+}
+.case-heading h2 {
+  font-size: clamp(32px, 4.1vw, 62px) !important;
+}
+@media (max-width: 860px) {
+  .hero h1 { font-size: clamp(38px, 10vw, 56px) !important; }
+  .section-head h2,
+  .about-sticky h2 { font-size: clamp(36px, 9vw, 54px) !important; }
+  .contact-main h2 { font-size: clamp(40px, 10.5vw, 64px) !important; }
+}
