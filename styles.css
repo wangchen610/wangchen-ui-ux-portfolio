@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --ink: #0b0e12;
   --ink-soft: #151a21;
   --paper: #f3f1ec;
@@ -2763,12 +2763,32 @@ body::before {
   }
   .opening-index {
     right: max(16px, env(safe-area-inset-right));
-    top: max(18px, env(safe-area-inset-top));
+    top: max(52px, calc(env(safe-area-inset-top) + 34px));
+  }
+  .opening-brand {
+    width: calc(100vw - 32px);
+    gap: 8px;
+  }
+  .opening-brand span,
+  .opening-brand em {
+    max-width: 100%;
+    font-size: 8px;
+    letter-spacing: .28em;
+    white-space: nowrap;
+  }
+  .opening-brand strong {
+    max-width: 100%;
+    font-size: clamp(28px, 8.2vw, 40px) !important;
+    letter-spacing: -.055em;
+    white-space: nowrap;
   }
   .opening-name {
     top: 62%;
     max-width: calc(100vw - 32px);
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .opening-hud-ring {
+    width: min(72vw, 280px);
   }
 }

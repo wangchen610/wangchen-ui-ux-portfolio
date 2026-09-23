@@ -1,4 +1,4 @@
-﻿const projects = {
+const projects = {
   sichuan: {
     number: "01",
     kicker: "NATIONAL PLATFORM / UI·UX",
@@ -357,7 +357,8 @@ function startOpeningFlow(canvas) {
   let height = 0;
   let particles = [];
   const startedAt = performance.now();
-  const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth > 900 ? 1 : 1.25);
+  const initialViewportWidth = window.visualViewport?.width || window.innerWidth;
+  const dpr = Math.min(window.devicePixelRatio || 1, initialViewportWidth > 900 ? 1 : 1.25);
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const smooth = (value) => value * value * (3 - 2 * value);
   const rand = (min, max) => min + Math.random() * (max - min);
@@ -397,8 +398,16 @@ function startOpeningFlow(canvas) {
 
   const resize = () => {
     const viewport = window.visualViewport;
+    const previousWidth = width;
+    const previousHeight = height;
+    const previousParticles = particles;
     width = Math.max(1, Math.round(viewport ? viewport.width : window.innerWidth));
     height = Math.max(1, Math.round(viewport ? viewport.height : window.innerHeight));
+    const opening = canvas.closest(".opening-screen");
+    if (opening) {
+      opening.style.width = width + "px";
+      opening.style.height = height + "px";
+    }
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     canvas.style.width = width + "px";
@@ -406,8 +415,22 @@ function startOpeningFlow(canvas) {
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     const count = Math.min(760, Math.max(480, Math.round((width * height) / 1200)));
     const targets = textTargets(count);
+    const scaleX = previousWidth ? width / previousWidth : 1;
+    const scaleY = previousHeight ? height / previousHeight : 1;
     particles = Array.from({ length: count }, (_, index) => {
-      const target = targets[index];
+      const target = targets[index] || { x: width / 2, y: height / 2 };
+      const source = previousParticles[index % previousParticles.length];
+      if (source) {
+        return {
+          ...source,
+          x: clamp(source.x * scaleX, -24, width + 24),
+          y: clamp(source.y * scaleY, -24, height + 24),
+          baseX: clamp(source.baseX * scaleX, 0, width),
+          targetX: target.x,
+          targetY: target.y,
+          wave: clamp(source.wave * Math.min(1.25, Math.max(.72, scaleX)), 5, 28)
+        };
+      }
       return {
         x: Math.random() * width,
         y: rand(-height * .22, height * .92),
