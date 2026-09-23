@@ -2855,3 +2855,19 @@ body::before {
     transform: scaleX(0);
   }
 }
+
+
+/* ===== Flat KPI metrics on mobile and WeChat ===== */
+@media (max-width: 860px) {
+  .stats-strip .stat,
+  .stats-strip .stat:nth-child(even),
+  .stats-strip .stat:nth-child(odd),
+  .stats-strip .stat:hover {
+    border-color: transparent !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
