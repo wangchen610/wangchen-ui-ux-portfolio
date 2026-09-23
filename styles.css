@@ -2828,6 +2828,15 @@ body::before {
     0 12px 28px rgba(var(--card-accent-rgb, 22,135,255), .1),
     0 4px 12px rgba(12,36,60,.055);
 }
+.project-card:hover {
+  border-color: rgba(255,255,255,.64);
+}
+.stats-strip .stat:hover {
+  border-color: rgba(255,255,255,.7) !important;
+}
+.case-gallery figure:hover {
+  border-color: var(--line);
+}
 .project-card:hover::after,
 .stats-strip .stat:hover::after {
   transform: scaleX(1);
