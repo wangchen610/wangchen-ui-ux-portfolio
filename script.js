@@ -368,14 +368,14 @@ function startOpeningFlow(canvas) {
     offscreen.height = height;
     const targetContext = offscreen.getContext("2d", { willReadFrequently: true });
     if (!targetContext) return [];
-    const fontSize = Math.min(width * .115, height * .2, 140);
+    const fontSize = Math.min(width * .095, height * .17, 120);
     targetContext.fillStyle = "#fff";
     targetContext.textAlign = "center";
     targetContext.textBaseline = "middle";
     targetContext.font = `900 ${fontSize}px "Arial Black", sans-serif`;
     const textWidth = targetContext.measureText("WANG CHEN").width;
-    const scale = Math.min(1, (width * .74) / textWidth);
-    targetContext.translate(width / 2, height / 2 - 10);
+    const scale = Math.min(1, (width * .62) / textWidth);
+    targetContext.translate(width / 2, height / 2 - 8);
     targetContext.scale(scale, scale);
     targetContext.fillText("WANG CHEN", 0, 0);
     targetContext.setTransform(1, 0, 0, 1, 0, 0);
@@ -398,26 +398,24 @@ function startOpeningFlow(canvas) {
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(1050, Math.max(480, Math.round((width * height) / 900)));
+    const count = Math.min(880, Math.max(420, Math.round((width * height) / 1050)));
     const targets = textTargets(count);
     particles = Array.from({ length: count }, (_, index) => {
       const target = targets[index];
-      const mix = clamp(target.x / width);
       return {
         x: Math.random() * width,
-        y: Math.random() * height,
-        previousX: Math.random() * width,
-        previousY: Math.random() * height,
+        y: rand(-height * .22, height * .92),
         baseX: Math.random() * width,
-        speed: rand(.2, .88),
-        drift: rand(-.24, .24),
-        wave: rand(8, 38),
+        speed: rand(.18, .72),
+        drift: rand(-.16, .16),
+        wave: rand(6, 28),
         targetX: target.x,
         targetY: target.y,
-        size: rand(.9, 2.4),
-        alpha: rand(.3, .94),
+        size: rand(.55, 1.55),
+        alpha: rand(.24, .82),
+        delay: rand(0, .25),
         phase: Math.random() * Math.PI * 2,
-        color: Math.round(54 + (199 - 54) * mix) + "," + Math.round(196 + (167 - 196) * mix) + ",255"
+        color: Math.random() > .74 ? "255,255,255" : Math.random() > .42 ? "102,221,255" : "114,166,255"
       };
     });
     context.fillStyle = "#000";
@@ -427,76 +425,74 @@ function startOpeningFlow(canvas) {
   const draw = (now) => {
     if (!running) return;
     const elapsed = (now - startedAt) / 1000;
-    const intro = clamp(elapsed / .8, 0, 1);
-    const morph = smooth(clamp((elapsed - .45) / 2.82, 0, 1));
+    const intro = clamp(elapsed / .72, 0, 1);
     context.globalCompositeOperation = "source-over";
     context.fillStyle = "rgba(0,0,0,.14)";
     context.fillRect(0, 0, width, height);
     context.globalCompositeOperation = "lighter";
     context.lineCap = "round";
     particles.forEach((particle) => {
-      particle.previousX = particle.x;
-      particle.previousY = particle.y;
-      if (morph < .02) {
+      const morph = smooth(clamp((elapsed - .8 - particle.delay) / 2.2, 0, 1));
+      const previousX = particle.x;
+      const previousY = particle.y;
+      if (morph < .015) {
         particle.baseX += particle.drift;
         particle.y += particle.speed;
-        particle.x = particle.baseX + Math.sin(elapsed * .92 + particle.phase) * particle.wave;
-        if (particle.y > height + 18) {
-          particle.y = -18;
+        particle.x = particle.baseX + Math.sin(elapsed * 1.45 + particle.phase) * particle.wave;
+        if (particle.y > height + 20) {
+          particle.y = -20;
           particle.baseX = Math.random() * width;
         }
       } else {
-        const pull = .042 + morph * .13;
-        const turbulence = 1 - morph;
-        particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.18 + particle.phase) * turbulence * .68;
-        particle.y += (particle.targetY - particle.y) * pull + Math.cos(elapsed * .94 + particle.phase) * turbulence * .46;
+        const pause = elapsed < 1.15 ? .18 : 1;
+        const pull = (.035 + morph * .12) * pause;
+        const turbulence = (1 - morph) * (1 - morph);
+        particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.4 + particle.phase) * turbulence * .75;
+        particle.y += (particle.targetY - particle.y) * pull + Math.cos(elapsed * 1.08 + particle.phase) * turbulence * .52;
       }
-      const particleFade = 1 - smooth(clamp((morph - .78) / .18, 0, 1));
-      const alpha = particle.alpha * (.5 + morph * .5) * intro * particleFade;
-      if (alpha < .008) return;
-      let directionX = particle.x - particle.previousX;
-      let directionY = particle.y - particle.previousY;
+      let directionX = particle.x - previousX;
+      let directionY = particle.y - previousY;
       const directionLength = Math.hypot(directionX, directionY);
       if (directionLength < .08) {
-        directionX = particle.drift || .2;
+        directionX = particle.drift || .15;
         directionY = particle.speed || .2;
       }
       const normalizedLength = Math.max(.001, Math.hypot(directionX, directionY));
-      const trailLength = 18 + particle.speed * 24;
+      const trailLength = 10 + particle.speed * 16;
       const startX = particle.x - (directionX / normalizedLength) * trailLength;
       const startY = particle.y - (directionY / normalizedLength) * trailLength;
-      context.strokeStyle = "rgba(" + particle.color + "," + alpha * .24 + ")";
-      context.lineWidth = particle.size * 3.1;
+      const opacity = particle.alpha * intro * (.75 + morph * .25);
+      context.strokeStyle = "rgba(" + particle.color + "," + opacity * .26 + ")";
+      context.lineWidth = particle.size * 2.8;
       context.beginPath();
       context.moveTo(startX, startY);
       context.lineTo(particle.x, particle.y);
       context.stroke();
-      context.strokeStyle = "rgba(" + particle.color + "," + alpha + ")";
-      context.lineWidth = Math.max(1, particle.size * .85);
+      context.strokeStyle = "rgba(" + particle.color + "," + opacity + ")";
+      context.lineWidth = Math.max(.75, particle.size * .78);
       context.beginPath();
       context.moveTo(startX, startY);
       context.lineTo(particle.x, particle.y);
       context.stroke();
     });
 
-    if (morph > .72) {
-      const reveal = smooth(clamp((morph - .72) / .2, 0, 1));
-      const drift = Math.sin(elapsed * 1.35) * width * .055;
+    if (elapsed > 2.7) {
+      const reveal = smooth(clamp((elapsed - 2.7) / 1.0, 0, 1));
       context.save();
       context.globalCompositeOperation = "screen";
-      context.globalAlpha = reveal * .76;
-      const textGradient = context.createLinearGradient(width * .1 + drift, 0, width * .9 + drift, 0);
-      textGradient.addColorStop(0, "#25b7ff");
-      textGradient.addColorStop(.46, "#7b8cff");
-      textGradient.addColorStop(1, "#c9a7ff");
-      context.fillStyle = textGradient;
+      context.globalAlpha = reveal * .08;
+      const gradient = context.createLinearGradient(width * .18, 0, width * .82, 0);
+      gradient.addColorStop(0, "#63dcff");
+      gradient.addColorStop(.5, "#b8ebff");
+      gradient.addColorStop(1, "#9a9cff");
+      context.fillStyle = gradient;
       context.textAlign = "center";
       context.textBaseline = "middle";
-      const fontSize = Math.min(width * .115, height * .2, 140);
+      const fontSize = Math.min(width * .095, height * .17, 120);
       context.font = `900 ${fontSize}px "Arial Black", sans-serif`;
       const textWidth = context.measureText("WANG CHEN").width;
-      const textScale = Math.min(1, (width * .74) / textWidth);
-      context.translate(width / 2, height / 2 - 10);
+      const textScale = Math.min(1, (width * .62) / textWidth);
+      context.translate(width / 2, height / 2 - 8);
       context.scale(textScale, textScale);
       context.fillText("WANG CHEN", 0, 0);
       context.restore();
@@ -553,7 +549,7 @@ function runOpeningAnimation() {
   root.style.scrollBehavior = previousScrollBehavior;
   const stopFlow = startOpeningFlow(document.querySelector("#opening-flow"));
   requestAnimationFrame(() => opening.classList.add("is-active"));
-  window.setTimeout(() => opening.classList.add("is-formed"), 3150);
+  window.setTimeout(() => opening.classList.add("is-formed"), 3200);
   window.setTimeout(() => {
     opening.classList.add("is-opening", "is-complete");
     root.classList.add("hero-entering");
