@@ -2859,6 +2859,7 @@ body::before {
 
 /* ===== Flat KPI metrics on mobile and WeChat ===== */
 @media (max-width: 860px) {
+  .stats-strip,
   .stats-strip .stat,
   .stats-strip .stat:nth-child(even),
   .stats-strip .stat:nth-child(odd),
