@@ -2563,3 +2563,37 @@ html.has-motion body { overflow: hidden; }
   .about-sticky h2 { font-size: clamp(36px, 9vw, 54px) !important; }
   .contact-main h2 { font-size: clamp(40px, 10.5vw, 64px) !important; }
 }
+
+
+/* ===== Ensure full particle word before reveal + smaller display type ===== */
+.opening-screen.is-complete {
+  transition: clip-path .7s cubic-bezier(.76, 0, .24, 1), visibility 0s linear .75s !important;
+}
+.hero h1 { font-size: clamp(38px, 4.55vw, 72px) !important; }
+.section-head h2,
+.about-sticky h2 { font-size: clamp(35px, 4vw, 60px) !important; }
+.contact-main h2 { font-size: clamp(41px, 5.35vw, 84px) !important; }
+.case-heading h2 { font-size: clamp(30px, 3.75vw, 56px) !important; }
+@media (max-width: 860px) {
+  .hero h1 { font-size: clamp(36px, 9.3vw, 52px) !important; }
+  .section-head h2,
+  .about-sticky h2 { font-size: clamp(34px, 8.2vw, 49px) !important; }
+  .contact-main h2 { font-size: clamp(38px, 9.7vw, 58px) !important; }
+}
+
+
+/* ===== Final reduced display type scale ===== */
+.hero h1 { font-size: clamp(36px, 4.25vw, 68px) !important; }
+.section-head h2,
+.about-sticky h2 { font-size: clamp(33px, 3.75vw, 56px) !important; }
+.contact-main h2 { font-size: clamp(38px, 4.85vw, 78px) !important; }
+.case-heading h2 { font-size: clamp(28px, 3.45vw, 52px) !important; }
+.project-content h3 { font-size: clamp(22px, 2.15vw, 34px) !important; }
+.education h3 { font-size: 24px !important; }
+.contact::before { font-size: clamp(76px, 16vw, 240px) !important; }
+@media (max-width: 860px) {
+  .hero h1 { font-size: clamp(34px, 8.7vw, 48px) !important; }
+  .section-head h2,
+  .about-sticky h2 { font-size: clamp(31px, 7.7vw, 46px) !important; }
+  .contact-main h2 { font-size: clamp(35px, 8.8vw, 54px) !important; }
+}
