@@ -2684,3 +2684,56 @@ body { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .case-story-content h3 { font-size: clamp(22px, 2.15vw, 34px) !important; }
   .contact::before { font-size: clamp(72px, 15vw, 220px) !important; }
 }
+
+
+/* ===== Cross-device scroll performance pass ===== */
+.page-noise,
+.cursor-glow,
+body::before {
+  display: none !important;
+}
+.site-header.is-scrolled {
+  background: rgba(248, 251, 253, .97) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 10px 24px rgba(31,73,108,.08) !important;
+}
+.hero-profile-card .portrait-shell,
+.profile-note,
+.floating-case,
+.stats-strip,
+.project-card,
+.capabilities,
+.capabilities > div,
+.education,
+.timeline-item,
+.contact-grid,
+.case-carousel,
+.case-fact,
+.decision-list li {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-color: rgba(248,251,253,.94) !important;
+}
+.project-card,
+.timeline-item,
+.education,
+.contact-grid {
+  contain: layout paint style;
+}
+.parallax-media {
+  transition: none !important;
+}
+@media (max-width: 860px) {
+  .section-light,
+  .marquee,
+  .experience,
+  .contact,
+  .work {
+    background-attachment: scroll !important;
+  }
+  .project-card:hover,
+  .stats-strip .stat:hover {
+    transform: none !important;
+  }
+}
