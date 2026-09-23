@@ -1906,12 +1906,12 @@ html.has-motion body { overflow: hidden; }
 }
 
 .hero h1 {
-  font-size: clamp(44px, 5.6vw, 92px) !important;
+  font-size: clamp(40px, 5.1vw, 84px) !important;
 }
 
 @media (max-width: 860px) {
   .hero h1 {
-    font-size: clamp(42px, 12vw, 66px) !important;
+    font-size: clamp(38px, 10.5vw, 60px) !important;
   }
 }
 
