@@ -2597,3 +2597,76 @@ html.has-motion body { overflow: hidden; }
   .about-sticky h2 { font-size: clamp(31px, 7.7vw, 46px) !important; }
   .contact-main h2 { font-size: clamp(35px, 8.8vw, 54px) !important; }
 }
+
+
+/* ===== Mobile timeline and WeChat compatibility ===== */
+:root { color-scheme: light only; }
+body { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header.is-scrolled,
+  .hero-profile-card .portrait-shell,
+  .profile-note,
+  .floating-case,
+  .stats-strip,
+  .project-card,
+  .capabilities,
+  .education,
+  .timeline-item,
+  .contact-grid,
+  .case-dialog,
+  .case-carousel,
+  .case-fact {
+    background: rgba(248, 251, 253, .97) !important;
+    box-shadow: 0 16px 40px rgba(31, 73, 108, .12) !important;
+  }
+}
+@media (max-width: 860px) {
+  .timeline {
+    display: grid;
+    gap: 14px;
+    border-top: 0;
+  }
+  .timeline-item {
+    display: block;
+    padding: 22px;
+    border: 1px solid rgba(255,255,255,.64);
+    border-radius: 14px;
+    background: rgba(255,255,255,.9);
+    box-shadow: 0 16px 40px rgba(31,73,108,.1);
+  }
+  .timeline-date {
+    margin: 0 0 16px;
+    padding: 0 0 14px;
+    border-bottom: 1px solid rgba(12,36,60,.1);
+    color: #537d0a;
+    font-size: 11px;
+  }
+  .timeline-main {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .timeline-index {
+    position: static;
+    display: block;
+    margin: 0 0 8px;
+  }
+  .timeline-main h3,
+  .timeline-main p,
+  .timeline-main .project-tags {
+    margin-left: 0 !important;
+  }
+  .timeline-main h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+  .timeline-main p {
+    margin-bottom: 18px;
+  }
+  .project-card,
+  .timeline-item,
+  .contact-grid,
+  .education {
+    background-color: rgba(248,251,253,.96) !important;
+  }
+}
