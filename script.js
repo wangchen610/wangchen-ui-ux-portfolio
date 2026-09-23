@@ -357,7 +357,7 @@ function startOpeningFlow(canvas) {
   let height = 0;
   let particles = [];
   const startedAt = performance.now();
-  const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth > 900 ? 1.25 : 1.5);
+  const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth > 900 ? 1 : 1.25);
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const smooth = (value) => value * value * (3 - 2 * value);
   const rand = (min, max) => min + Math.random() * (max - min);
@@ -403,7 +403,7 @@ function startOpeningFlow(canvas) {
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(900, Math.max(520, Math.round((width * height) / 980)));
+    const count = Math.min(760, Math.max(480, Math.round((width * height) / 1200)));
     const targets = textTargets(count);
     particles = Array.from({ length: count }, (_, index) => {
       const target = targets[index];
