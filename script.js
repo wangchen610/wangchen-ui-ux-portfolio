@@ -396,8 +396,9 @@ function startOpeningFlow(canvas) {
   };
 
   const resize = () => {
-    width = window.innerWidth;
-    height = window.innerHeight;
+    const viewport = window.visualViewport;
+    width = Math.max(1, Math.round(viewport ? viewport.width : window.innerWidth));
+    height = Math.max(1, Math.round(viewport ? viewport.height : window.innerHeight));
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     canvas.style.width = width + "px";
@@ -481,11 +482,15 @@ function startOpeningFlow(canvas) {
 
   resize();
   window.addEventListener("resize", resize, { passive: true });
+  window.addEventListener("orientationchange", resize, { passive: true });
+  window.visualViewport?.addEventListener("resize", resize, { passive: true });
   frame = requestAnimationFrame(draw);
   return () => {
     running = false;
     if (frame) cancelAnimationFrame(frame);
     window.removeEventListener("resize", resize);
+    window.removeEventListener("orientationchange", resize);
+    window.visualViewport?.removeEventListener("resize", resize);
     context.clearRect(0, 0, width, height);
   };
 }
