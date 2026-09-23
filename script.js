@@ -398,7 +398,7 @@ function startOpeningFlow(canvas) {
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(880, Math.max(420, Math.round((width * height) / 1050)));
+    const count = Math.min(1150, Math.max(620, Math.round((width * height) / 760)));
     const targets = textTargets(count);
     particles = Array.from({ length: count }, (_, index) => {
       const target = targets[index];
@@ -411,8 +411,8 @@ function startOpeningFlow(canvas) {
         wave: rand(6, 28),
         targetX: target.x,
         targetY: target.y,
-        size: rand(.55, 1.55),
-        alpha: rand(.24, .82),
+        size: rand(.16, .46),
+        alpha: rand(.16, .5),
         delay: rand(0, .25),
         phase: Math.random() * Math.PI * 2,
         color: Math.random() > .74 ? "255,255,255" : Math.random() > .42 ? "102,221,255" : "114,166,255"
@@ -458,18 +458,18 @@ function startOpeningFlow(canvas) {
         directionY = particle.speed || .2;
       }
       const normalizedLength = Math.max(.001, Math.hypot(directionX, directionY));
-      const trailLength = 10 + particle.speed * 16;
+      const trailLength = 2 + particle.speed * 4;
       const startX = particle.x - (directionX / normalizedLength) * trailLength;
       const startY = particle.y - (directionY / normalizedLength) * trailLength;
       const opacity = particle.alpha * intro * (.75 + morph * .25);
       context.strokeStyle = "rgba(" + particle.color + "," + opacity * .26 + ")";
-      context.lineWidth = particle.size * 2.8;
+      context.lineWidth = Math.max(.45, particle.size * 1.25);
       context.beginPath();
       context.moveTo(startX, startY);
       context.lineTo(particle.x, particle.y);
       context.stroke();
       context.strokeStyle = "rgba(" + particle.color + "," + opacity + ")";
-      context.lineWidth = Math.max(.75, particle.size * .78);
+      context.lineWidth = Math.max(.24, particle.size * .5);
       context.beginPath();
       context.moveTo(startX, startY);
       context.lineTo(particle.x, particle.y);
