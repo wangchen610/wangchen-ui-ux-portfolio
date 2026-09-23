@@ -368,14 +368,19 @@ function startOpeningFlow(canvas) {
     offscreen.height = height;
     const targetContext = offscreen.getContext("2d", { willReadFrequently: true });
     if (!targetContext) return [];
-    const fontSize = Math.min(width * .095, height * .17, 120);
+    const compact = width <= 700;
+    const fontSize = compact
+      ? Math.min(width * .078, 38)
+      : width <= 1024
+        ? Math.min(width * .085, height * .15, 92)
+        : Math.min(width * .095, height * .17, 120);
     targetContext.fillStyle = "#fff";
     targetContext.textAlign = "center";
     targetContext.textBaseline = "middle";
     targetContext.font = `900 ${fontSize}px "Arial Black", sans-serif`;
     const textWidth = targetContext.measureText("WANG CHEN").width;
-    const scale = Math.min(1, (width * .62) / textWidth);
-    targetContext.translate(width / 2, height / 2 - 8);
+    const scale = Math.min(1, (width * (compact ? .76 : .62)) / textWidth);
+    targetContext.translate(width / 2, height * (compact ? .43 : .5) - 8);
     targetContext.scale(scale, scale);
     targetContext.fillText("WANG CHEN", 0, 0);
     targetContext.setTransform(1, 0, 0, 1, 0, 0);
@@ -444,9 +449,10 @@ function startOpeningFlow(canvas) {
           particle.baseX = Math.random() * width;
         }
       } else {
+        const settle = smooth(clamp((elapsed - 2.72 - particle.delay * .35) / .82, 0, 1));
         const pause = elapsed < 1.05 ? .22 : 1;
-        const pull = (.028 + morph * .12) * pause;
-        const turbulence = (1 - morph) * (1 - morph);
+        const pull = (.028 + morph * .12 + settle * .095) * pause;
+        const turbulence = (1 - morph) * (1 - morph) * (1 - settle * .88);
         particle.x += (particle.targetX - particle.x) * pull + Math.sin(elapsed * 1.28 + particle.phase) * turbulence * .58;
         particle.y += (particle.targetY - particle.y) * pull + Math.cos(elapsed * .98 + particle.phase) * turbulence * .4;
       }
