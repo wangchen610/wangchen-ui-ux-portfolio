@@ -2864,3 +2864,43 @@ body::before {
     background-color: transparent !important;
   }
 }
+
+
+/* ===== Mobile viewport containment fix ===== */
+@media (max-width: 860px) {
+  .project-card,
+  .timeline-item,
+  .education,
+  .contact-grid {
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+  }
+  .site-header,
+  .hero,
+  .section,
+  .work,
+  .about,
+  .experience,
+  .contact,
+  .project-list,
+  .project-card,
+  .timeline,
+  .timeline-item {
+    max-width: 100%;
+  }
+  .project-visual,
+  .project-card:not(.project-card--featured) .project-visual,
+  .project-card--featured .project-visual {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
+  .project-visual img,
+  .parallax-media {
+    max-width: 100%;
+  }
+  .contact {
+    overflow: hidden;
+  }
+}
