@@ -761,37 +761,14 @@ body { color: var(--ink); background: var(--bg); }
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   padding: 18px 20px;
   border: 1px solid rgba(12, 36, 60, .12);
   border-radius: 14px;
   background: rgba(255, 255, 255, .72);
   box-shadow: 0 16px 40px rgba(46, 91, 130, .08);
 }
-.profile-identity {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin: 0 0 10px;
-  padding: 0 0 10px;
-  border-bottom: 1px solid rgba(12, 36, 60, .1);
-}
-.profile-identity span {
-  color: var(--accent-deep);
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: .2em;
-  line-height: 1;
-  white-space: nowrap;
-}
-.profile-identity strong {
-  color: var(--ink);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  line-height: 1;
-  white-space: nowrap;
-}
+
 .profile-note .section-kicker { font-size: 8px; }
 .profile-note h3 {
   margin: 10px 0 8px;
@@ -833,8 +810,7 @@ body { color: var(--ink); background: var(--bg); }
   .hero-profile-card { height: 214px; gap: 12px; }
   .hero-profile-card .portrait-shell { flex-basis: 140px; width: 140px; }
   .profile-note { padding: 14px; }
-  .profile-identity { gap: 8px; margin-bottom: 8px; padding-bottom: 8px; }
-  .profile-identity strong { font-size: 14px; }
+
   .profile-note h3 { margin-top: 5px; font-size: 15px; }
   .profile-note p { font-size: 10px; }
   .floating-case-a, .floating-case-b { bottom: 26px; }
@@ -844,9 +820,7 @@ body { color: var(--ink); background: var(--bg); }
   .hero-profile-card { height: 176px; gap: 9px; }
   .hero-profile-card .portrait-shell { flex-basis: 104px; width: 104px; height: 176px; padding: 7px; border-radius: 11px; }
   .profile-note { padding: 11px; border-radius: 11px; }
-  .profile-identity { gap: 6px; margin-bottom: 7px; padding-bottom: 7px; }
-  .profile-identity span { font-size: 6px; letter-spacing: .16em; }
-  .profile-identity strong { font-size: 13px; }
+
   .profile-note .section-kicker { display: none; }
   .profile-note h3 { margin: 0 0 4px; font-size: 12px; }
   .profile-note p { font-size: 9px; line-height: 1.5; }
