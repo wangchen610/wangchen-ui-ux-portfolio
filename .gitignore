@@ -1,0 +1,15 @@
+# 设计源文件与高清原始素材，不提交到公开仓库
+*.psd
+*.ai
+*.sketch
+*.fig
+*.xd
+*.indd
+*.tif
+*.tiff
+*.heic
+*.mov
+*.mp4
+/source/
+/originals/
+/raw/
